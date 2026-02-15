@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Candidate, NewsItem, HotTopic } from '../types';
-import { MOCK_CANDIDATES, MOCK_NEWS, MOCK_HOT_TOPIC } from '../constants';
+import { MOCK_CANDIDATES, MOCK_NEWS, MOCK_HOT_TOPICS } from '../constants';
 
 // Safe environment variable accessor to prevent "process is not defined" crashes in browser
 const getEnv = (key: string) => {
@@ -97,7 +97,10 @@ export const fetchNews = async (): Promise<NewsItem[]> => {
 
 export const fetchHotTopic = async (): Promise<HotTopic | null> => {
   if (useMock) {
-    return Math.random() > 0.3 ? MOCK_HOT_TOPIC : null; // 70% chance of hot topic
+    // Return a random topic every time to simulate dynamic alerts
+    // Pick random from the list
+    const randomIndex = Math.floor(Math.random() * MOCK_HOT_TOPICS.length);
+    return MOCK_HOT_TOPICS[randomIndex];
   }
 
   const { data, error } = await supabase!

@@ -5,25 +5,52 @@ import {
   Card, Player, PlayedCard 
 } from '../lib/callbreakEngine';
 import { playSound } from '../lib/soundUtils';
-import { Play, RotateCcw, Award, CheckCircle, Trophy, Sparkles, Smartphone, Maximize2 } from 'lucide-react';
+import { Play, RotateCcw, Award, CheckCircle, Trophy, Sparkles, Smartphone, Maximize2, Layers } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 // --- Components ---
 
-const CardView = ({ card, onClick, playable, played, style, small }: { card: Card, onClick?: () => void, playable?: boolean, played?: boolean, style?: React.CSSProperties, small?: boolean }) => {
+interface CardViewProps {
+  card: Card;
+  onClick?: () => void;
+  playable?: boolean;
+  played?: boolean;
+  style?: React.CSSProperties;
+  small?: boolean;
+  isHidden?: boolean;
+}
+
+const CardView: React.FC<CardViewProps> = ({ card, onClick, playable, played, style, small, isHidden }) => {
   const isRed = card.suit === 'H' || card.suit === 'D';
   const suitIcons: Record<string, string> = { 'S': '♠', 'H': '♥', 'D': '♦', 'C': '♣' };
   const rankMap: Record<number, string> = { 11: 'J', 12: 'Q', 13: 'K', 14: 'A' };
   const displayRank = rankMap[card.rank] || card.rank.toString();
 
-  // Mobile optimization: Larger touch targets, bold text
+  // Optimized sizes for Mobile Landscape: Cards should be larger relative to screen
+  // Default (Phone Landscape): w-14 h-20 (previously w-10 h-14 was too small)
+  // Tablet/Desktop: w-20 h-28 or larger
+  const baseClasses = small 
+    ? 'w-10 h-14' 
+    : 'w-[4.5rem] h-24 md:w-20 md:h-28 lg:w-24 lg:h-36'; // Significantly increased base size for mobile
+
+  if (isHidden) {
+    return (
+      <div 
+        className={`relative bg-blue-800 rounded-lg shadow-md border-2 border-white/20 flex items-center justify-center select-none ${baseClasses}`}
+        style={style}
+      >
+        <div className="w-full h-full opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxwYXRoIGQ9Ik0wIDBoOHY4SDB6IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')]"></div>
+      </div>
+    );
+  }
+
   return (
     <div 
       onClick={playable ? onClick : undefined}
       className={`
         relative bg-white rounded-lg shadow-xl border border-gray-300 flex flex-col justify-between p-1 select-none transition-all duration-200
-        ${small ? 'w-10 h-14 md:w-14 md:h-20' : 'w-16 h-24 md:w-20 md:h-28 lg:w-24 lg:h-36'} 
-        ${playable ? 'cursor-pointer hover:-translate-y-6 hover:shadow-2xl hover:border-yellow-400 hover:ring-2 hover:ring-yellow-400 z-10' : ''}
+        ${baseClasses}
+        ${playable ? 'cursor-pointer hover:-translate-y-4 md:hover:-translate-y-6 hover:shadow-2xl hover:border-yellow-400 hover:ring-2 hover:ring-yellow-400 z-10' : ''}
         ${played ? 'animate-slide-up shadow-2xl scale-110' : ''}
       `}
       style={{
@@ -32,14 +59,14 @@ const CardView = ({ card, onClick, playable, played, style, small }: { card: Car
         background: 'linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%)'
       }}
     >
-      <div className={`${small ? 'text-xs' : 'text-sm md:text-xl'} font-black leading-none flex flex-col items-center`}>
+      <div className={`${small ? 'text-xs' : 'text-base md:text-xl'} font-black leading-none flex flex-col items-center`}>
         <span>{displayRank}</span>
         <span className={small ? 'text-xs' : 'text-sm md:text-xl'}>{suitIcons[card.suit]}</span>
       </div>
-      <div className={`absolute inset-0 flex items-center justify-center pointer-events-none opacity-10 ${small ? 'text-2xl' : 'text-5xl'}`}>
+      <div className={`absolute inset-0 flex items-center justify-center pointer-events-none opacity-10 ${small ? 'text-2xl' : 'text-4xl md:text-5xl'}`}>
         {suitIcons[card.suit]}
       </div>
-      <div className={`${small ? 'text-xs' : 'text-sm md:text-xl'} font-black leading-none flex flex-col items-center rotate-180`}>
+      <div className={`${small ? 'text-xs' : 'text-base md:text-xl'} font-black leading-none flex flex-col items-center rotate-180`}>
         <span>{displayRank}</span>
         <span>{suitIcons[card.suit]}</span>
       </div>
@@ -48,21 +75,20 @@ const CardView = ({ card, onClick, playable, played, style, small }: { card: Car
 };
 
 const PlayerAvatar = ({ player, currentTurn, isWinner, position }: { player: Player, currentTurn: number, isWinner?: boolean, position: 'bottom' | 'top' | 'left' | 'right' }) => {
-  // Deterministic realistic faces
   const avatarUrl = player.id === 0 
-    ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=crop&w=150&h=150' // User (Male)
+    ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=crop&w=150&h=150' 
     : player.id === 1 
-      ? 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?fit=crop&w=150&h=150' // Left (Female)
+      ? 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?fit=crop&w=150&h=150'
       : player.id === 2
-        ? 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?fit=crop&w=150&h=150' // Top (Male)
-        : 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?fit=crop&w=150&h=150'; // Right (Female)
+        ? 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?fit=crop&w=150&h=150'
+        : 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?fit=crop&w=150&h=150';
 
   return (
     <div className={`flex flex-col items-center transition-all duration-500 relative z-20 ${currentTurn === player.id ? 'scale-110' : 'scale-100 opacity-90'}`}>
       
       {/* Avatar Circle */}
       <div className={`
-        relative w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-full p-1 shadow-2xl bg-white
+        relative w-10 h-10 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-full p-1 shadow-2xl bg-white
         ${currentTurn === player.id ? 'bg-gradient-to-r from-yellow-300 to-orange-400 animate-pulse' : 'bg-gray-200'}
         ${isWinner ? 'bg-gradient-to-r from-green-400 to-emerald-600 ring-4 ring-green-400' : ''}
       `}>
@@ -81,23 +107,23 @@ const PlayerAvatar = ({ player, currentTurn, isWinner, position }: { player: Pla
 
       {/* Name Badge */}
       <div className="absolute -bottom-2 z-30">
-        <span className="block text-[10px] md:text-xs lg:text-sm font-black text-white bg-gray-900 px-2 py-0.5 rounded-full border border-gray-700 shadow-xl truncate max-w-[100px] text-center">
+        <span className="block text-[9px] md:text-xs lg:text-sm font-black text-white bg-gray-900 px-2 py-0.5 rounded-full border border-gray-700 shadow-xl truncate max-w-[100px] text-center">
           {player.name}
         </span>
       </div>
 
       {/* Stats Display (Bid/Won) */}
       <div className={`
-        absolute ${position === 'bottom' ? 'top-0 -right-16' : position === 'left' ? '-bottom-8' : position === 'right' ? '-bottom-8' : '-right-16 top-0'} 
-        bg-black/60 backdrop-blur-md rounded-lg p-1 border border-white/10 shadow-lg flex items-center space-x-2
+        absolute ${position === 'bottom' ? 'top-0 -right-14 md:-right-16' : position === 'left' ? '-bottom-6 md:-bottom-8' : position === 'right' ? '-bottom-6 md:-bottom-8' : '-right-14 md:-right-16 top-0'} 
+        bg-black/60 backdrop-blur-md rounded-lg p-0.5 md:p-1 border border-white/10 shadow-lg flex items-center space-x-1 md:space-x-2
       `}>
          <div className="flex flex-col items-center px-1 border-r border-white/20">
-           <span className="text-[8px] text-yellow-200 font-bold uppercase">Bid</span>
-           <span className="text-sm font-black text-yellow-400 leading-none">{player.bid}</span>
+           <span className="text-[7px] md:text-[8px] text-yellow-200 font-bold uppercase">Bid</span>
+           <span className="text-xs md:text-sm font-black text-yellow-400 leading-none">{player.bid}</span>
          </div>
          <div className="flex flex-col items-center px-1">
-           <span className="text-[8px] text-green-200 font-bold uppercase">Won</span>
-           <span className="text-sm font-black text-green-400 leading-none">{player.tricksWon}</span>
+           <span className="text-[7px] md:text-[8px] text-green-200 font-bold uppercase">Won</span>
+           <span className="text-xs md:text-sm font-black text-green-400 leading-none">{player.tricksWon}</span>
          </div>
       </div>
 
@@ -109,7 +135,7 @@ const PlayerAvatar = ({ player, currentTurn, isWinner, position }: { player: Pla
 
 const CallbreakPage = () => {
   const { t } = useApp();
-  const [gameState, setGameState] = useState<'IDLE' | 'BIDDING' | 'PLAYING' | 'ROUND_END' | 'GAME_END'>('IDLE');
+  const [gameState, setGameState] = useState<'IDLE' | 'SHUFFLING' | 'BIDDING' | 'PLAYING' | 'ROUND_END' | 'GAME_END'>('IDLE');
   const [round, setRound] = useState(1);
   const [players, setPlayers] = useState<Player[]>([]);
   const [currentTurn, setCurrentTurn] = useState(0); 
@@ -145,7 +171,6 @@ const CallbreakPage = () => {
       
       if (screen.orientation && (screen.orientation as any).lock) {
         await (screen.orientation as any).lock('landscape').catch(() => {
-          // Lock failed (common on iOS), user must rotate manually
           console.log('Orientation lock failed or not supported');
         });
       }
@@ -171,10 +196,23 @@ const CallbreakPage = () => {
   }, []);
 
   const startRound = (currentPlayers: Player[], roundNum: number) => {
-    setGameState('IDLE');
-    setMsg(`Dealing Round ${roundNum}...`);
+    setGameState('SHUFFLING');
+    setMsg('Shuffling Cards...');
     playSound('shuffle');
+
+    // Reset basics
+    setTrick([]);
+    trickRef.current = [];
+    setCurrentTurn(0);
     
+    // Simulate Shuffle Animation Duration
+    setTimeout(() => {
+        dealAndStart(currentPlayers);
+    }, 2500);
+  };
+
+  const dealAndStart = (currentPlayers: Player[]) => {
+    setMsg('Dealing...');
     const deck = shuffleDeck();
     const hands = dealCards(deck);
     
@@ -188,15 +226,13 @@ const CallbreakPage = () => {
 
     playersRef.current = updatedPlayers;
     setPlayers(updatedPlayers);
-    setTrick([]);
-    trickRef.current = [];
-    setCurrentTurn(0);
-
+    
+    // Small delay to show dealt cards
     setTimeout(() => {
-      setGameState('BIDDING');
-      setMsg('Your Turn to Bid!');
-    }, 1000);
-  };
+        setGameState('BIDDING');
+        setMsg('Your Turn to Bid!');
+    }, 500);
+  }
 
   // --- Bidding ---
 
@@ -301,29 +337,58 @@ const CallbreakPage = () => {
 
   // --- Render Helpers ---
 
+  // Shuffle Animation Component
+  const renderShuffleAnimation = () => {
+    if (gameState !== 'SHUFFLING') return null;
+    return (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+            <div className="relative w-24 h-36">
+                {[0, 1, 2, 3, 4].map(i => (
+                    <div 
+                        key={i}
+                        className="absolute inset-0 bg-blue-800 rounded-lg border-2 border-white shadow-xl animate-pulse"
+                        style={{
+                            transform: `rotate(${i * 5 - 10}deg)`,
+                            animation: `shuffleMove 0.5s infinite alternate ${i * 0.1}s`
+                        }}
+                    >
+                        <div className="w-full h-full opacity-30 bg-pattern"></div>
+                    </div>
+                ))}
+            </div>
+            <style>{`
+                @keyframes shuffleMove {
+                    0% { transform: translateX(0) rotate(0); }
+                    100% { transform: translateX(50px) rotate(15deg); }
+                }
+                .bg-pattern {
+                    background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1h2v2H1V1zm4 4h2v2H5V5zm4 4h2v2H9V9z' fill='%23ffffff' fill-opacity='0.2'/%3E%3C/svg%3E");
+                }
+            `}</style>
+        </div>
+    );
+  };
+
   const renderBiddingModal = () => {
     if (gameState !== 'BIDDING') return null;
     return (
-      // Changed: overlay doesn't cover bottom 35% of screen so cards are visible
       <div className="absolute inset-x-0 top-0 bottom-[35%] z-40 flex items-center justify-center animate-fade-in pointer-events-none">
-        {/* Semi-transparent background that fades out at bottom */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-transparent pointer-events-auto"></div>
-        
-        <div className="relative z-50 bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-3xl shadow-2xl border border-gray-700 max-w-sm w-full mx-4 text-center animate-bounce-in pointer-events-auto">
-          <h2 className="text-3xl font-black text-white mb-2">Bid Your Hand</h2>
-          <p className="text-gray-400 mb-6 text-sm">Select number of tricks (Haat)</p>
+        <div className="relative z-50 bg-gray-900/95 p-6 rounded-3xl shadow-2xl border border-yellow-500/30 max-w-sm w-full mx-4 text-center animate-bounce-in pointer-events-auto backdrop-blur-md">
+          <h2 className="text-2xl md:text-3xl font-black text-white mb-1">Bid Your Hand</h2>
+          <p className="text-gray-400 mb-4 text-xs md:text-sm">How many tricks will you win?</p>
           <div className="grid grid-cols-4 gap-3">
             {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
               <button
                 key={num}
                 onClick={() => handleUserBid(num)}
-                className="aspect-square flex items-center justify-center text-2xl font-black rounded-xl bg-gray-700 hover:bg-yellow-500 hover:text-black hover:scale-110 transition-all duration-200 text-white shadow-lg border border-gray-600 hover:border-yellow-400"
+                className="aspect-square flex items-center justify-center text-xl md:text-2xl font-black rounded-xl bg-gray-800 hover:bg-yellow-500 hover:text-black hover:scale-110 transition-all duration-200 text-white shadow-lg border border-gray-700 hover:border-yellow-400 active:scale-95"
               >
                 {num}
               </button>
             ))}
           </div>
-          <p className="text-xs text-yellow-500/80 mt-6 font-bold uppercase tracking-wider">♠ Check your cards below</p>
+          <p className="text-[10px] md:text-xs text-yellow-500/80 mt-4 font-bold uppercase tracking-wider">♠ Check your cards below</p>
         </div>
       </div>
     );
@@ -335,47 +400,67 @@ const CallbreakPage = () => {
     const winner = sortedPlayers[0];
 
     return (
-      <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md animate-fade-in p-4">
-        <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-gray-700">
-          <div className="bg-gradient-to-r from-nepalBlue to-purple-800 p-8 text-white text-center">
-            <h2 className="text-3xl font-black uppercase tracking-tight mb-2">
-              {gameState === 'GAME_END' ? '🏆 Tournament Over' : `Round ${round} Complete`}
+      <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in p-4 overflow-y-auto">
+        {/* Confetti (Simple CSS Simulation) */}
+        {gameState === 'GAME_END' && (
+             <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute top-0 left-1/4 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                <div className="absolute top-10 right-1/4 w-3 h-3 bg-yellow-500 rounded-full animate-ping delay-100"></div>
+                <div className="absolute top-1/2 left-1/2 w-4 h-4 bg-blue-500 rounded-full animate-ping delay-200"></div>
+             </div>
+        )}
+
+        <div className="bg-gray-900 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl border border-gray-700 relative">
+          
+          {/* Header */}
+          <div className="bg-gradient-to-r from-indigo-900 via-purple-900 to-pink-900 p-8 text-white text-center relative overflow-hidden">
+            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
+            <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight mb-2 relative z-10">
+              {gameState === 'GAME_END' ? '🏆 Tournament Champion' : `Round ${round} Complete`}
             </h2>
-            {gameState === 'GAME_END' && (
-              <div className="flex flex-col items-center mt-4 animate-bounce">
-                <Trophy size={64} className="text-yellow-300 drop-shadow-lg" />
-                <p className="text-2xl font-black mt-2 text-yellow-300">{winner.name} Wins!</p>
+            {gameState === 'GAME_END' ? (
+              <div className="flex flex-col items-center mt-4 animate-bounce relative z-10">
+                <Trophy size={80} className="text-yellow-300 drop-shadow-[0_0_15px_rgba(253,224,71,0.5)]" />
+                <p className="text-3xl font-black mt-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-500">{winner.name}</p>
+                <p className="text-sm text-yellow-200/80 font-bold uppercase tracking-widest mt-1">Total Score: {winner.totalScore.toFixed(1)}</p>
               </div>
+            ) : (
+                <p className="text-purple-200 relative z-10">Get ready for the next round!</p>
             )}
           </div>
           
-          <div className="p-4">
-            <div className="grid grid-cols-4 gap-2 mb-2 text-xs font-black text-gray-400 uppercase tracking-wider text-center border-b border-gray-200 dark:border-gray-700 pb-3">
-              <div className="text-left pl-2">Player</div>
-              <div>Bid</div>
-              <div>Won</div>
-              <div>Total</div>
+          {/* Table */}
+          <div className="p-4 md:p-6 bg-gray-800/50">
+            <div className="grid grid-cols-4 gap-4 mb-2 text-[10px] md:text-xs font-black text-gray-500 uppercase tracking-wider text-center border-b border-gray-700 pb-3">
+              <div className="text-left pl-4">Player</div>
+              <div className="bg-gray-800/50 rounded py-1">Bid</div>
+              <div className="bg-gray-800/50 rounded py-1">Won</div>
+              <div className="bg-gray-800/50 rounded py-1">Score</div>
             </div>
-            {players.map(p => (
-              <div key={p.id} className="grid grid-cols-4 gap-2 py-4 border-b border-gray-100 dark:border-gray-800 text-base items-center text-center hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
-                <div className="text-left pl-2 flex items-center gap-2 font-bold text-gray-800 dark:text-gray-200">
-                  <div className={`w-2 h-2 rounded-full ${p.id === 0 ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
-                  {p.name}
+            {players.map((p, idx) => (
+              <div key={p.id} className={`grid grid-cols-4 gap-4 py-3 md:py-4 border-b border-gray-800 text-sm md:text-base items-center text-center rounded-xl transition-all duration-300 ${p.id === 0 ? 'bg-indigo-900/30 border border-indigo-500/30' : 'hover:bg-gray-800'}`}>
+                <div className="text-left pl-4 flex items-center gap-3 font-bold text-gray-200">
+                  <div className={`w-8 h-8 rounded-full border-2 ${idx === 0 ? 'border-yellow-400' : 'border-gray-600'} overflow-hidden`}>
+                     {/* Reuse avatar logic simply */}
+                     <div className={`w-full h-full ${p.id === 0 ? 'bg-blue-500' : 'bg-gray-600'}`}></div>
+                  </div>
+                  <span>{p.name} {p.id === 0 && '(You)'}</span>
                 </div>
-                <div className="font-bold text-gray-500">{p.bid}</div>
-                <div className={`font-black ${p.tricksWon >= p.bid ? 'text-green-500' : 'text-red-500'}`}>{p.tricksWon}</div>
-                <div className="font-black text-nepalBlue dark:text-blue-400 text-lg">{p.totalScore.toFixed(1)}</div>
+                <div className="font-bold text-gray-400">{p.bid}</div>
+                <div className={`font-black ${p.tricksWon >= p.bid ? 'text-green-400' : 'text-red-400'}`}>{p.tricksWon}</div>
+                <div className="font-black text-white text-lg md:text-xl">{p.totalScore.toFixed(1)}</div>
               </div>
             ))}
           </div>
 
-          <div className="p-6 bg-gray-50 dark:bg-gray-800 flex justify-center border-t border-gray-200 dark:border-gray-700">
+          {/* Footer Actions */}
+          <div className="p-6 bg-gray-900 flex justify-center border-t border-gray-800">
             {gameState === 'GAME_END' ? (
-              <button onClick={initGame} className="flex items-center gap-2 px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-black transition shadow-lg hover:scale-105 active:scale-95 text-lg">
+              <button onClick={initGame} className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-2xl font-black transition shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:scale-105 active:scale-95 text-lg">
                 <RotateCcw size={24} /> Play Again
               </button>
             ) : (
-              <button onClick={nextRound} className="flex items-center gap-2 px-8 py-4 bg-nepalBlue hover:bg-blue-700 text-white rounded-2xl font-black transition shadow-lg hover:scale-105 active:scale-95 text-lg">
+              <button onClick={nextRound} className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl font-black transition shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:scale-105 active:scale-95 text-lg">
                 Next Round <Play size={24} fill="currentColor" />
               </button>
             )}
@@ -399,7 +484,7 @@ const CallbreakPage = () => {
            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}>
       </div>
 
-      {/* Portrait Mode Warning Overlay - Forces Landscape */}
+      {/* Portrait Mode Warning Overlay */}
       {isPortrait && (
         <div className="absolute inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center p-8 text-center animate-fade-in text-white">
           <Smartphone size={64} className="mb-4 animate-spin-slow rotate-90" />
@@ -414,7 +499,7 @@ const CallbreakPage = () => {
         </div>
       )}
 
-      {/* Close Button for Fullscreen Game */}
+      {/* Close Button */}
       <div className="absolute top-4 left-4 z-40">
         <a href="#/news" className="flex items-center gap-2 bg-black/30 backdrop-blur px-3 py-1.5 rounded-full text-white/80 hover:bg-black/50 text-xs font-bold border border-white/10 transition-colors">
             Exit
@@ -437,6 +522,9 @@ const CallbreakPage = () => {
         </div>
       </div>
 
+      {/* Shuffle Animation Layer */}
+      {renderShuffleAnimation()}
+
       {/* Game Board */}
       <div className="flex-grow relative flex items-center justify-center w-full h-full">
         
@@ -447,10 +535,10 @@ const CallbreakPage = () => {
             {trick.map((play, i) => {
               let trans = '';
               // Landscape Coordinates
-              if (play.playerId === 0) trans = 'translate-y-16 lg:translate-y-24 scale-110';
-              if (play.playerId === 1) trans = '-translate-x-24 lg:-translate-x-32 -rotate-12 scale-100';
-              if (play.playerId === 2) trans = '-translate-y-16 lg:-translate-y-24 scale-100';
-              if (play.playerId === 3) trans = 'translate-x-24 lg:translate-x-32 rotate-12 scale-100';
+              if (play.playerId === 0) trans = 'translate-y-12 lg:translate-y-24 scale-110';
+              if (play.playerId === 1) trans = '-translate-x-20 lg:-translate-x-32 -rotate-12 scale-100';
+              if (play.playerId === 2) trans = '-translate-y-12 lg:-translate-y-24 scale-100';
+              if (play.playerId === 3) trans = 'translate-x-20 lg:translate-x-32 rotate-12 scale-100';
               
               return (
                 <div key={play.card.id} className={`absolute z-${i + 10} transition-all duration-500 cubic-bezier(0.175, 0.885, 0.32, 1.275) transform ${trans}`}>
@@ -475,9 +563,9 @@ const CallbreakPage = () => {
         {botTop && (
           <div className="absolute top-2 left-1/2 -translate-x-1/2 flex flex-col items-center z-10">
              <PlayerAvatar player={botTop} currentTurn={currentTurn} position="top" />
-             <div className="mt-[-20px] flex -space-x-1 opacity-80 scale-75">
-               {botTop.hand.map((_, i) => (
-                 <div key={i} className="w-6 h-9 bg-blue-700 border border-white/30 rounded-sm shadow-sm"></div>
+             <div className="mt-[-25px] flex -space-x-4 opacity-100 scale-50">
+               {botTop.hand.map((card, i) => (
+                 <CardView key={i} card={card} isHidden small style={{transform: `rotate(${(i-6)*2}deg)`}} />
                ))}
              </div>
           </div>
@@ -487,9 +575,9 @@ const CallbreakPage = () => {
         {botLeft && (
           <div className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 flex flex-col items-start z-10">
              <PlayerAvatar player={botLeft} currentTurn={currentTurn} position="left" />
-             <div className="mt-2 ml-4 flex flex-col -space-y-6 opacity-80 scale-75 origin-top-left">
-               {botLeft.hand.map((_, i) => (
-                 <div key={i} className="w-9 h-6 bg-blue-700 border border-white/30 rounded-sm shadow-sm"></div>
+             <div className="mt-2 ml-[-30px] flex flex-col -space-y-12 opacity-100 scale-50 origin-top-left">
+               {botLeft.hand.map((card, i) => (
+                 <CardView key={i} card={card} isHidden small style={{transform: `rotate(90deg)`}} />
                ))}
              </div>
           </div>
@@ -499,9 +587,9 @@ const CallbreakPage = () => {
         {botRight && (
           <div className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 flex flex-col items-end z-10">
              <PlayerAvatar player={botRight} currentTurn={currentTurn} position="right" />
-             <div className="mt-2 mr-4 flex flex-col -space-y-6 opacity-80 scale-75 origin-top-right">
-               {botRight.hand.map((_, i) => (
-                 <div key={i} className="w-9 h-6 bg-blue-700 border border-white/30 rounded-sm shadow-sm"></div>
+             <div className="mt-2 mr-[-30px] flex flex-col -space-y-12 opacity-100 scale-50 origin-top-right">
+               {botRight.hand.map((card, i) => (
+                 <CardView key={i} card={card} isHidden small style={{transform: `rotate(-90deg)`}} />
                ))}
              </div>
           </div>
@@ -511,17 +599,17 @@ const CallbreakPage = () => {
         {user && (
           <div className="absolute bottom-0 left-0 right-0 z-30 flex flex-col items-center">
              
-             <div className="absolute bottom-4 right-8 lg:right-24 lg:bottom-12">
+             <div className="absolute bottom-4 right-4 md:right-8 lg:right-24 lg:bottom-12">
                <PlayerAvatar player={user} currentTurn={currentTurn} position="bottom" />
              </div>
 
-             {/* User Hand - Optimized for Landscape */}
-             <div className="relative w-full max-w-4xl px-2 h-32 lg:h-48 flex justify-center items-end mb-2 lg:mb-4">
+             {/* User Hand - Optimized for Mobile Landscape */}
+             <div className="relative w-full max-w-4xl px-2 h-28 md:h-32 lg:h-48 flex justify-center items-end mb-1 md:mb-2 lg:mb-4">
                <div className="flex justify-center w-full" style={{ marginLeft: '0px' }}>
                  {user.hand.map((card, i) => {
                    const valid = gameState === 'PLAYING' && currentTurn === 0 && isValidMove(card, user.hand, leadSuit, trick);
                    const offset = i - (user.hand.length - 1) / 2;
-                   const rotation = offset * 2; 
+                   const rotation = offset * 3; // Slightly more rotation for fan effect
                    const yTrans = Math.abs(offset) * 3;
 
                    return (
@@ -529,7 +617,8 @@ const CallbreakPage = () => {
                        key={card.id} 
                        className="transform transition-all duration-200 hover:z-50 origin-bottom"
                        style={{ 
-                         marginLeft: i === 0 ? 0 : '-35px', // Less overlap for landscape
+                         // Dynamic margin based on hand size to prevent cards going offscreen
+                         marginLeft: i === 0 ? 0 : `calc(-3vw - 15px)`, 
                          marginBottom: valid ? `${20 + yTrans}px` : `${yTrans}px`,
                          zIndex: i,
                          transform: `rotate(${rotation}deg)`,

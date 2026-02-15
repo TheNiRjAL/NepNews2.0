@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, X, Calendar as CalendarIcon, MapPin, Info } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { CalendarDay } from '../types';
@@ -85,8 +85,44 @@ const generateMonthData = (year: number, monthIndex: number): { days: CalendarDa
 const CalendarPage = () => {
   const { t, language } = useApp();
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
+  
+  // Initialize state but waiting for useEffect to set current date
   const [year, setYear] = useState(2081);
-  const [monthIndex, setMonthIndex] = useState(0); // 0 = Baishakh
+  const [monthIndex, setMonthIndex] = useState(0); 
+
+  // Effect to load "Present Day" based on System Time
+  useEffect(() => {
+    const now = new Date();
+    // Rough Algorithm: Nepali Year is AD + 57 (approximately)
+    // Nepali New Year is usually mid-April.
+    // So if current month is Jan, Feb, Mar, or early Apr, the Nepali year is AD + 56.
+    // However, specifically for 2024-2025 cycle:
+    // Apr 2024 starts 2081.
+    
+    // Determine AD Year offset
+    const currentADYear = now.getFullYear();
+    const currentADMonth = now.getMonth(); // 0-11
+    
+    let currentBSYear = currentADYear + 57;
+    // Before mid-April, it's technically previous BS year end
+    if (currentADMonth < 3 || (currentADMonth === 3 && now.getDate() < 13)) {
+      currentBSYear = currentADYear + 56;
+    }
+
+    // Determine Month Index (0 = Baishakh = ~April)
+    // April (3) -> Baishakh (0)
+    // May (4) -> Jestha (1)
+    // ...
+    // Jan (0) -> Poush/Magh (8/9)
+    let currentBSMonth = (currentADMonth - 3 + 12) % 12;
+    // Adjust for mid-month split (Simple toggle for mock)
+    if (now.getDate() < 13) {
+      currentBSMonth = (currentBSMonth - 1 + 12) % 12;
+    }
+
+    setYear(currentBSYear);
+    setMonthIndex(currentBSMonth);
+  }, []);
   
   const { days, startDayIndex } = useMemo(() => generateMonthData(year, monthIndex), [year, monthIndex]);
   
@@ -96,6 +132,26 @@ const CalendarPage = () => {
   
   // Padding for start of month
   const startPad = Array.from({ length: startDayIndex });
+
+  // Today marker calculation (approx)
+  const today = new Date();
+  const isCurrentMonthDisplayed = () => {
+     // Very rough check for UI purposes
+     const currentADYear = today.getFullYear();
+     const bsYear = currentADYear + 57; 
+     // Logic is loose here because it's a mock calendar generator
+     // We just check if the year matches what we calculated initially
+     return Math.abs(year - bsYear) <= 1; 
+  };
+  // We will highlight a specific day if it matches approximately
+  const currentDayHighlight = (dateBS: number) => {
+    // For mock, we just say if it's the current month and day is roughly calculated
+    // In a real app with exact conversion, this matches exactly.
+    // Here we just map AD day to BS day loosely: AD Day + 17 approx = BS Day
+    const approxBSDay = (today.getDate() + 17) % 30 || 1; 
+    return isCurrentMonthDisplayed() && dateBS === approxBSDay;
+  };
+
 
   const handlePrevMonth = () => {
     if (monthIndex === 0) {
@@ -176,11 +232,13 @@ const CalendarPage = () => {
         <div className="grid grid-cols-7">
           {/* Empty Slots */}
           {startPad.map((_, i) => (
-            <div key={`empty-${i}`} className="h-24 md:h-32 border-b border-r border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/50"></div>
+            <div key={`empty-${i}`} className="h-20 md:h-32 border-b border-r border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/50"></div>
           ))}
 
           {/* Date Slots */}
-          {days.map((day, idx) => (
+          {days.map((day, idx) => {
+            const isToday = currentDayHighlight(day.dateBS);
+            return (
             <div 
               key={idx}
               onClick={() => setSelectedDay(day)}
@@ -189,32 +247,35 @@ const CalendarPage = () => {
               role="button"
               aria-label={`${day.dateBS} ${currentMonthName}, ${day.event ? day.event : ''}`}
               className={`
-                group relative h-24 md:h-32 border-b border-r border-gray-100 dark:border-gray-700/50 p-2 
+                group relative h-20 md:h-32 border-b border-r border-gray-100 dark:border-gray-700/50 p-1 md:p-2 
                 transition-all duration-200 cursor-pointer outline-none focus:ring-2 focus:ring-inset focus:ring-nepalBlue
                 hover:bg-blue-50 dark:hover:bg-blue-900/10
                 ${day.isHoliday ? 'bg-red-50/30 dark:bg-red-900/5' : ''}
+                ${isToday ? 'bg-blue-100/50 dark:bg-blue-900/20' : ''}
               `}
             >
+              {isToday && <div className="absolute top-1 right-1 w-2 h-2 bg-nepalBlue rounded-full animate-pulse md:w-3 md:h-3"></div>}
+
               {/* Nepali Date */}
               <div className="flex justify-between items-start">
-                <span className={`text-2xl md:text-3xl font-bold leading-none ${day.isHoliday ? 'text-nepalRed dark:text-red-400' : 'text-gray-700 dark:text-gray-200'}`}>
+                <span className={`text-xl md:text-3xl font-bold leading-none ${day.isHoliday ? 'text-nepalRed dark:text-red-400' : 'text-gray-700 dark:text-gray-200'}`}>
                   {day.dateBS}
                 </span>
-                {/* English Date */}
-                <span className="text-[10px] md:text-xs font-medium text-gray-400 dark:text-gray-500 font-sans">
-                  {day.dateAD}
+                {/* English Date - Hidden on very small screens if needed, but useful */}
+                <span className="text-[9px] md:text-xs font-medium text-gray-400 dark:text-gray-500 font-sans">
+                  {day.dateAD.split(' ')[0]}
                 </span>
               </div>
 
               {/* Tithi */}
-              <div className="mt-1 text-[10px] md:text-xs text-gray-500 dark:text-gray-400 font-medium truncate">
+              <div className="mt-0.5 md:mt-1 text-[9px] md:text-xs text-gray-500 dark:text-gray-400 font-medium truncate">
                 {day.tithi}
               </div>
 
               {/* Event Badge */}
               {day.event && (
-                <div className="absolute bottom-2 left-1 right-1">
-                   <div className={`text-[10px] px-1.5 py-0.5 rounded truncate font-medium shadow-sm ${
+                <div className="absolute bottom-1 left-1 right-1">
+                   <div className={`text-[8px] md:text-[10px] px-1 md:px-1.5 py-0.5 rounded truncate font-medium shadow-sm ${
                      day.isHoliday 
                        ? 'bg-nepalRed text-white' 
                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
@@ -224,7 +285,7 @@ const CalendarPage = () => {
                 </div>
               )}
             </div>
-          ))}
+          )})}
         </div>
       </div>
 

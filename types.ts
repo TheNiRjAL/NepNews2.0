@@ -35,6 +35,7 @@ export interface HoroscopeSign {
   luckyColor: string;
   luckyNumber: number;
   icon: string;
+  energy?: number;
 }
 
 export interface CalendarDay {

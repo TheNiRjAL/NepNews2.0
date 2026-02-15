@@ -233,9 +233,35 @@ export const MOCK_RASHIFAL: HoroscopeSign[] = [
   { id: 'min', nepaliName: 'मीन', englishName: 'Pisces', prediction: 'खर्च बढ्ने सम्भावना छ। स्वास्थ्यमा ध्यान दिनुहोला।', luckyColor: 'पहेँलो', luckyNumber: 3, icon: '♓' },
 ];
 
-export const MOCK_HOT_TOPIC: HotTopic = {
-  id: 'hot1',
-  title: 'काठमाडौंको मतगणना लाइभ अपडेट',
-  description: 'काठमाडौं महानगरपालिकाको मतगणना जारी छ। बालेन शाहले अग्रता कायमै राखेका छन्।',
-  isActive: true
-};
+export const MOCK_HOT_TOPICS: HotTopic[] = [
+  {
+    id: 'hot_election',
+    title: 'काठमाडौंको मतगणना लाइभ अपडेट',
+    description: 'काठमाडौं महानगरपालिकाको मतगणना जारी छ। बालेन शाहले अग्रता कायमै राखेका छन्।',
+    isActive: true
+  },
+  {
+    id: 'hot_weather',
+    title: 'भारी वर्षाको चेतावनी',
+    description: 'मौसम पूर्वानुमान महाशाखाले आज देशका पहाडी भू-भागमा भारी वर्षाको सम्भावना रहेको जनाएको छ। सतर्क रहनुहोला।',
+    isActive: true
+  },
+  {
+    id: 'hot_sports',
+    title: 'नेपालको ऐतिहासिक जित',
+    description: 'नेपाली राष्ट्रिय क्रिकेट टोलीले विश्वकप छनौट चरणमा उत्कृष्ट प्रदर्शन गर्दै अर्को चरणमा प्रवेश गरेको छ।',
+    isActive: true
+  },
+  {
+    id: 'hot_traffic',
+    title: 'ट्राफिक अपडेट: चक्रपथ जाम',
+    description: 'कलंकी-कोटेश्वर सडक खण्डमा मर्मत कार्य भइरहेकोले सवारी चाप बढेको छ। वैकल्पिक बाटो प्रयोग गर्नुहोला।',
+    isActive: true
+  },
+   {
+    id: 'hot_festival',
+    title: 'आजको विशेष चाड',
+    description: 'आज बडा दशैंको टीका ग्रहण गर्ने उत्तम साइत बिहान ११:५१ बजे रहेको नेपाल पञ्चाङ्ग निर्णायक समितिले जनाएको छ।',
+    isActive: true
+  }
+];
