@@ -2,28 +2,23 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Candidate, NewsItem, HotTopic } from '../types';
 import { MOCK_CANDIDATES, MOCK_NEWS, MOCK_HOT_TOPICS } from '../constants';
 
-// Safe environment variable accessor to prevent "process is not defined" crashes in browser
+// Safe environment variable accessor
 const getEnv = (key: string) => {
+  // Vite env access
+  if ((import.meta as any).env && (import.meta as any).env[key]) {
+    return (import.meta as any).env[key];
+  }
+  // Fallback for process.env if defined
   try {
-    // Check for Vite's import.meta.env
-    // @ts-ignore
-    if (typeof import.meta !== 'undefined' && import.meta.env) {
-      // @ts-ignore
-      return import.meta.env[key];
-    }
-  } catch (e) {}
-
-  try {
-    // Check for process.env (Next.js / CRA)
-    if (typeof process !== 'undefined' && process.env) {
+    if (typeof process !== 'undefined' && process.env && process.env[key]) {
       return process.env[key];
     }
-  } catch (e) {}
+  } catch(e) {}
   
   return '';
 };
 
-// Try different naming conventions (Next.js vs Vite)
+// Check for both standard and Vite-prefixed keys
 const SUPABASE_URL = getEnv('NEXT_PUBLIC_SUPABASE_URL') || getEnv('VITE_SUPABASE_URL') || '';
 const SUPABASE_ANON_KEY = getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') || getEnv('VITE_SUPABASE_ANON_KEY') || '';
 
@@ -37,12 +32,10 @@ if (SUPABASE_URL && SUPABASE_ANON_KEY) {
   }
 }
 
-// Wrapper to determine if we use real DB or Mock Data
 const useMock = !supabase;
 
 export const getAllCandidates = async (): Promise<Candidate[]> => {
   if (useMock) {
-    // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 800));
     return MOCK_CANDIDATES;
   }
@@ -57,7 +50,6 @@ export const getAllCandidates = async (): Promise<Candidate[]> => {
 
 export const searchCandidates = async (query: string): Promise<Candidate[]> => {
   if (useMock) {
-    // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 400));
     const lowerQuery = query.toLowerCase();
     return MOCK_CANDIDATES.filter(c => 
@@ -68,7 +60,6 @@ export const searchCandidates = async (query: string): Promise<Candidate[]> => {
     );
   }
   
-  // Real implementation
   const { data, error } = await supabase!
     .from('candidates')
     .select('*')
@@ -81,7 +72,6 @@ export const searchCandidates = async (query: string): Promise<Candidate[]> => {
 export const fetchNews = async (): Promise<NewsItem[]> => {
   if (useMock) {
     await new Promise(resolve => setTimeout(resolve, 600));
-    // Randomize slightly to simulate "Live" updates
     return [...MOCK_NEWS].sort(() => Math.random() - 0.5);
   }
 
@@ -92,13 +82,11 @@ export const fetchNews = async (): Promise<NewsItem[]> => {
     .limit(10);
 
   if (error) throw error;
-  return data as unknown as NewsItem[]; // Casting for simplicity
+  return data as unknown as NewsItem[];
 };
 
 export const fetchHotTopic = async (): Promise<HotTopic | null> => {
   if (useMock) {
-    // Return a random topic every time to simulate dynamic alerts
-    // Pick random from the list
     const randomIndex = Math.floor(Math.random() * MOCK_HOT_TOPICS.length);
     return MOCK_HOT_TOPICS[randomIndex];
   }
