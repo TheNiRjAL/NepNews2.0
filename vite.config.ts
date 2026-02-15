@@ -9,13 +9,16 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
-      // Map the system variable VITE_API_KEY (or API_KEY) to process.env.API_KEY for the SDK
+      // Robustly define process.env.API_KEY. 
+      // Vercel/Vite replaces this string literal with the actual value at build time.
       'process.env.API_KEY': JSON.stringify(env.VITE_API_KEY || env.API_KEY || ''),
-      // Prevent "process is not defined" errors for other libraries
-      'process.env': {},
+      
+      // Polyfill process.env to prevent "process is not defined" crashes in 3rd party libs
+      'process.env': JSON.stringify({}), 
     },
     build: {
       outDir: 'dist',
+      sourcemap: false, // Disable sourcemaps in production for security/performance
     }
   };
 });
