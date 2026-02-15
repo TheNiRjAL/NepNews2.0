@@ -138,82 +138,82 @@ export const MOCK_CANDIDATES: Candidate[] = [
 export const MOCK_NEWS: NewsItem[] = [
   {
     id: '1',
-    title: 'निर्वाचन आयोगद्वारा स्थानीय तह निर्वाचनको मिति घोषणा',
-    description: 'निर्वाचन आयोगले आगामी वैशाख ३० गते एकै चरणमा स्थानीय तहको निर्वाचन गर्ने औपचारिक घोषणा गरेको छ।',
+    title: 'निर्वाचन परिणाम लाइभ: काठमाडौंमा बालेनको अग्रता कायमै',
+    description: 'पछिल्लो मतगणना अनुसार काठमाडौं महानगरपालिकामा स्वतन्त्र उम्मेदवार बालेन शाहले आफ्ना प्रतिस्पर्धीहरू भन्दा उल्लेख्य मतान्तरले अग्रता लिइरहेका छन्।',
     source: 'कान्तिपुर',
     imageUrl: 'https://picsum.photos/800/400?random=10',
-    publishedAt: new Date().toISOString(),
+    publishedAt: new Date().toISOString(), // Just Now
     category: 'election',
     url: 'https://ekantipur.com/'
   },
   {
     id: '2',
-    title: 'प्रमुख दलहरूले उम्मेदवारको अन्तिम नामावली टुंग्याए',
-    description: 'मध्यरातसम्म चलेको लामो छलफलपछि प्रमुख राजनीतिक दलहरूले महानगरपालिकाका मुख्य पदहरूका लागि उम्मेदवारहरूको सूची अन्तिम रूप दिएका छन्।',
+    title: 'देशभरको मौसममा बदली, केही स्थानमा भारी वर्षा',
+    description: 'मौसम पूर्वानुमान महाशाखाका अनुसार आज दिउँसो देशका पहाडी भू-भागमा मेघ गर्जनसहित वर्षाको सम्भावना रहेको छ।',
     source: 'अनलाइन खबर',
     imageUrl: 'https://picsum.photos/800/400?random=11',
-    publishedAt: new Date(Date.now() - 3600000).toISOString(),
-    category: 'politics',
+    publishedAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+    category: 'national',
     url: 'https://www.onlinekhabar.com/'
   },
   {
     id: '3',
-    title: 'देशभर मतदाता शिक्षा कार्यक्रम सुरु',
-    description: 'आयोगले यस वर्ष बदर मत कम गर्न सुनिश्चित गर्न सबै ७७ जिल्लामा मतदाता शिक्षा कार्यक्रम सुरु गरेको छ।',
-    source: 'हिमालयन टाइम्स',
-    imageUrl: '',
-    publishedAt: new Date(Date.now() - 7200000).toISOString(),
-    category: 'election',
-    url: 'https://thehimalayantimes.com/'
-  },
-  {
-    id: '4',
-    title: 'सीमा नाकाहरूमा सुरक्षा व्यवस्था कडा',
-    description: 'आगामी निर्वाचनको पूर्वसन्ध्यामा कुनै पनि अनाधिकृत गतिविधि रोक्न प्रमुख सीमा नाकाहरूमा सुरक्षा व्यवस्था कडा पारिएको छ।',
+    title: 'नेपाल राष्ट्र बैंकद्वारा नयाँ मौद्रिक नीति सार्वजनिक',
+    description: 'आर्थिक स्थिरता कायम गर्न र मुद्रास्फीति नियन्त्रण गर्न राष्ट्र बैंकले कडा मौद्रिक नीति अख्तियार गरेको छ।',
     source: 'सेतोपाटी',
     imageUrl: '',
-    publishedAt: new Date(Date.now() - 10800000).toISOString(),
+    publishedAt: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
     category: 'national',
     url: 'https://www.setopati.com/'
   },
   {
+    id: '4',
+    title: 'सीमा नाकाहरूमा सुरक्षा व्यवस्था कडा',
+    description: 'चाडपर्वको समयमा हुने आवतजावतलाई व्यवस्थित गर्न र सुरक्षा चुनौती कम गर्न सीमा नाकाहरूमा विशेष निगरानी बढाइएको छ।',
+    source: 'हिमालयन टाइम्स',
+    imageUrl: '',
+    publishedAt: new Date(Date.now() - 10800000).toISOString(), // 3 hours ago
+    category: 'national',
+    url: 'https://thehimalayantimes.com/'
+  },
+  {
     id: '5',
-    title: 'प्रमुख शहरहरूमा स्वतन्त्र उम्मेदवारहरूको लहर',
-    description: 'काठमाडौं, पोखरा र धरानमा मेयर पदका लागि स्वतन्त्र उम्मेदवारी दर्ता गराउनेको संख्यामा उल्लेख्य वृद्धि भएको छ।',
+    title: 'प्रमुख शहरहरूमा फोहोर व्यवस्थापनको समस्या',
+    description: 'काठमाडौं उपत्यका लगायतका प्रमुख शहरहरूमा फोहोर नउठ्दा जनजीवन प्रभावित बनेको छ।',
     source: 'रातोपाटी',
     imageUrl: '',
-    publishedAt: new Date(Date.now() - 14400000).toISOString(),
+    publishedAt: new Date(Date.now() - 14400000).toISOString(), // 4 hours ago
     category: 'politics',
     url: 'https://ratopati.com/'
   },
   {
     id: '6',
-    title: '५० जिल्लाका लागि मतपत्र छपाई सम्पन्न',
-    description: 'जनक शिक्षा सामग्री केन्द्रले ५० दुर्गम जिल्लाहरूका लागि मतपत्र छपाई कार्य सम्पन्न गरेको जनाएको छ।',
+    title: 'शैक्षिक सत्र २०८१ को भर्ना अभियान सुरु',
+    description: 'सरकारले "सबै बालबालिकालाई विद्यालय पठाऔं" भन्ने नाराका साथ नयाँ शैक्षिक सत्रको भर्ना अभियान सुरु गरेको छ।',
     source: 'गोरखापत्र',
     imageUrl: '',
-    publishedAt: new Date(Date.now() - 18000000).toISOString(),
-    category: 'election',
+    publishedAt: new Date(Date.now() - 18000000).toISOString(), // 5 hours ago
+    category: 'national',
     url: 'https://gorkhapatraonline.com/'
   },
   {
     id: '7',
-    title: 'निर्वाचन दिनको मौसम पूर्वानुमान',
-    description: 'मौसम पूर्वानुमान महाशाखाले निर्वाचनको दिन देशका अधिकांश स्थानमा मौसम सफा रहने पूर्वानुमान गरेको छ।',
-    source: 'मौसम विभाग',
+    title: 'नेपाली क्रिकेट टोलीको उत्कृष्ट प्रदर्शन',
+    description: 'अन्तर्राष्ट्रिय प्रतियोगितामा नेपाली खेलाडीहरूले उत्कृष्ट ब्याटिङ र बलिङको नमुना प्रस्तुत गरेका छन्।',
+    source: 'खेलकुद खबर',
     imageUrl: '',
-    publishedAt: new Date(Date.now() - 21600000).toISOString(),
+    publishedAt: new Date(Date.now() - 21600000).toISOString(), // 6 hours ago
     category: 'national',
     url: 'https://www.mfd.gov.np/'
   },
   {
     id: '8',
-    title: 'आचारसंहिता उल्लंघनका घटनाहरू सार्वजनिक',
-    description: 'निर्वाचन आयोगले आचारसंहिता उल्लंघन गरेको आरोपमा दुई प्रमुख दलहरूसँग स्पष्टीकरण सोधेको छ।',
+    title: 'पर्यटन क्षेत्रमा उत्साहजनक सुधार',
+    description: 'कोरोना महामारीपछि नेपाल आउने विदेशी पर्यटकहरूको संख्यामा उल्लेख्य वृद्धि भएको पर्यटन बोर्डले जनाएको छ।',
     source: 'नागरिक',
     imageUrl: '',
-    publishedAt: new Date(Date.now() - 25200000).toISOString(),
-    category: 'election',
+    publishedAt: new Date(Date.now() - 25200000).toISOString(), // 7 hours ago
+    category: 'national',
     url: 'https://nagariknews.nagariknetwork.com/'
   }
 ];
@@ -236,32 +236,26 @@ export const MOCK_RASHIFAL: HoroscopeSign[] = [
 export const MOCK_HOT_TOPICS: HotTopic[] = [
   {
     id: 'hot_election',
-    title: 'काठमाडौंको मतगणना लाइभ अपडेट',
-    description: 'काठमाडौं महानगरपालिकाको मतगणना जारी छ। बालेन शाहले अग्रता कायमै राखेका छन्।',
+    title: 'निर्वाचन परिणाम अपडेट',
+    description: 'पछिल्लो मतपरिणाम अनुसार प्रमुख शहरहरूमा स्वतन्त्र उम्मेदवारहरूको अग्रता कायमै छ। पूर्ण विवरणको लागि हेर्दै रहनुहोस्।',
     isActive: true
   },
   {
     id: 'hot_weather',
-    title: 'भारी वर्षाको चेतावनी',
-    description: 'मौसम पूर्वानुमान महाशाखाले आज देशका पहाडी भू-भागमा भारी वर्षाको सम्भावना रहेको जनाएको छ। सतर्क रहनुहोला।',
+    title: 'मौसम पूर्व-सूचना',
+    description: 'आगामी ३ दिनसम्म देशका अधिकांश स्थानमा हल्का देखि मध्यम वर्षाको सम्भावना रहेको छ। यात्रा गर्दा सतर्क रहनुहोला।',
     isActive: true
   },
   {
     id: 'hot_sports',
-    title: 'नेपालको ऐतिहासिक जित',
-    description: 'नेपाली राष्ट्रिय क्रिकेट टोलीले विश्वकप छनौट चरणमा उत्कृष्ट प्रदर्शन गर्दै अर्को चरणमा प्रवेश गरेको छ।',
+    title: 'खेलकुद अपडेट',
+    description: 'नेपाली राष्ट्रिय टोलीले अन्तर्राष्ट्रिय प्रतियोगितामा ऐतिहासिक सफलता हासिल गरेको छ।',
     isActive: true
   },
   {
     id: 'hot_traffic',
-    title: 'ट्राफिक अपडेट: चक्रपथ जाम',
-    description: 'कलंकी-कोटेश्वर सडक खण्डमा मर्मत कार्य भइरहेकोले सवारी चाप बढेको छ। वैकल्पिक बाटो प्रयोग गर्नुहोला।',
-    isActive: true
-  },
-   {
-    id: 'hot_festival',
-    title: 'आजको विशेष चाड',
-    description: 'आज बडा दशैंको टीका ग्रहण गर्ने उत्तम साइत बिहान ११:५१ बजे रहेको नेपाल पञ्चाङ्ग निर्णायक समितिले जनाएको छ।',
+    title: 'ट्राफिक अपडेट',
+    description: 'उपत्यकाका प्रमुख चोकहरूमा सवारी चाप सामान्य रहेको छ। ट्राफिक नियमको पालना गरौं।',
     isActive: true
   }
 ];
