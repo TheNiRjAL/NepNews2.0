@@ -6,7 +6,6 @@ import HoroscopePage from './pages/HoroscopePage';
 import CalendarPage from './pages/CalendarPage';
 import AdminPage from './pages/AdminPage';
 import CallbreakPage from './pages/CallbreakPage';
-import HotTopicModal from './components/HotTopicModal';
 import { AppProvider } from './context/AppContext';
 
 // Simple Home component that redirects to News page (Dashboard)
@@ -28,7 +27,6 @@ const App = () => {
             <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </Layout>
-        <HotTopicModal />
       </HashRouter>
     </AppProvider>
   );

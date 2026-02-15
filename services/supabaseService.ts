@@ -2,8 +2,29 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Candidate, NewsItem, HotTopic } from '../types';
 import { MOCK_CANDIDATES, MOCK_NEWS, MOCK_HOT_TOPIC } from '../constants';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+// Safe environment variable accessor to prevent "process is not defined" crashes in browser
+const getEnv = (key: string) => {
+  try {
+    // Check for Vite's import.meta.env
+    // @ts-ignore
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      // @ts-ignore
+      return import.meta.env[key];
+    }
+  } catch (e) {}
+
+  try {
+    // Check for process.env (Next.js / CRA)
+    if (typeof process !== 'undefined' && process.env) {
+      return process.env[key];
+    }
+  } catch (e) {}
+  
+  return '';
+};
+
+const SUPABASE_URL = getEnv('NEXT_PUBLIC_SUPABASE_URL') || getEnv('VITE_SUPABASE_URL') || '';
+const SUPABASE_ANON_KEY = getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') || getEnv('VITE_SUPABASE_ANON_KEY') || '';
 
 let supabase: SupabaseClient | null = null;
 
