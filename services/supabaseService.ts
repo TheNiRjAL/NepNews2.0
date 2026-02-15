@@ -81,9 +81,9 @@ export const searchCandidates = async (query: string): Promise<Candidate[]> => {
 export const fetchNews = async (): Promise<NewsItem[]> => {
   if (useMock) {
     await new Promise(resolve => setTimeout(resolve, 600));
-    // Return news sorted by date for freshness
+    // Sort news by date descending (newest first)
     return [...MOCK_NEWS].sort((a, b) => 
-        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     );
   }
 
@@ -99,33 +99,32 @@ export const fetchNews = async (): Promise<NewsItem[]> => {
 
 export const fetchHotTopic = async (): Promise<HotTopic | null> => {
   if (useMock) {
-    // Prioritize Breaking News:
-    // Sort news by date descending to get the absolute latest
+    // 1. Get latest news sorted by date
     const sortedNews = [...MOCK_NEWS].sort((a, b) => 
       new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     );
     
-    if (sortedNews.length > 0) {
-      const latest = sortedNews[0];
-      const now = Date.now();
-      const newsTime = new Date(latest.publishedAt).getTime();
-      const hoursDiff = (now - newsTime) / (1000 * 60 * 60);
-
-      // User requested "at least 5 hour old news or more latest news"
-      // We interpret this as: Show the latest news, provided it is within the last 5-6 hours.
-      // Our MOCK_NEWS[0] is always "Just Now", MOCK_NEWS[5] is 5 hours ago.
-      // If we have news within ~6 hours, use it as Hot Topic.
-      if (hoursDiff <= 6) {
-         return {
-           id: `breaking_${latest.id}`,
-           title: `ताजा अपडेट: ${latest.title}`, // Prefixing with "Fresh Update"
-           description: latest.description,
-           isActive: true
-         };
+    const latestNews = sortedNews[0];
+    
+    // 2. Check if the latest news is within 2 hours
+    if (latestNews) {
+      const newsTime = new Date(latestNews.publishedAt).getTime();
+      const currentTime = Date.now();
+      const hoursDiff = (currentTime - newsTime) / (1000 * 60 * 60);
+      
+      // Strict check: Only show as Hot Topic if <= 2 hours old
+      if (hoursDiff <= 2) {
+        return {
+          id: `breaking-${latestNews.id}`,
+          title: `ताजा अपडेट: ${latestNews.title}`, // Prefix: Fresh Update
+          description: latestNews.description,
+          isActive: true
+        };
       }
     }
 
-    // Fallback if no recent news (unlikely with dynamic mock data)
+    // Fallback: If no news is recent enough (< 2 hours), return a random static topic
+    // This handles the case where "new" news isn't available
     const randomIndex = Math.floor(Math.random() * MOCK_HOT_TOPICS.length);
     return MOCK_HOT_TOPICS[randomIndex];
   }

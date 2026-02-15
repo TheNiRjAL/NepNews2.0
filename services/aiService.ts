@@ -1,9 +1,31 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { HoroscopeSign } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Safe accessor for API key to handle browser environments
+const getApiKey = () => {
+  try {
+    if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+      return process.env.API_KEY;
+    }
+    // @ts-ignore
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_KEY) {
+       // @ts-ignore
+       return import.meta.env.VITE_API_KEY;
+    }
+  } catch (e) {
+    console.warn("API Key access failed");
+  }
+  return '';
+};
+
+const apiKey = getApiKey();
+const ai = new GoogleGenAI({ apiKey });
 
 export const fetchAIHoroscope = async (language: 'np' | 'en', targetDate: Date): Promise<Partial<HoroscopeSign>[]> => {
+  if (!apiKey) {
+    throw new Error("API Key missing");
+  }
+
   try {
     const dateString = targetDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
     const prompt = `Generate a daily horoscope for ${dateString} for all 12 zodiac signs in ${language === 'np' ? 'Nepali' : 'English'}. 
