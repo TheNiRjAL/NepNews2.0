@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Candidate, NewsItem, HotTopic } from '../types';
-import { MOCK_CANDIDATES, MOCK_NEWS, MOCK_HOT_TOPICS } from '../constants';
+import { MOCK_CANDIDATES, MOCK_NEWS, MOCK_HOT_TOPIC } from '../constants';
 
 // Safe environment variable accessor to prevent "process is not defined" crashes in browser
 const getEnv = (key: string) => {
@@ -23,6 +23,7 @@ const getEnv = (key: string) => {
   return '';
 };
 
+// Try different naming conventions (Next.js vs Vite)
 const SUPABASE_URL = getEnv('NEXT_PUBLIC_SUPABASE_URL') || getEnv('VITE_SUPABASE_URL') || '';
 const SUPABASE_ANON_KEY = getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') || getEnv('VITE_SUPABASE_ANON_KEY') || '';
 
@@ -80,10 +81,8 @@ export const searchCandidates = async (query: string): Promise<Candidate[]> => {
 export const fetchNews = async (): Promise<NewsItem[]> => {
   if (useMock) {
     await new Promise(resolve => setTimeout(resolve, 600));
-    // Sort news by date descending (newest first)
-    return [...MOCK_NEWS].sort((a, b) => 
-      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-    );
+    // Randomize slightly to simulate "Live" updates
+    return [...MOCK_NEWS].sort(() => Math.random() - 0.5);
   }
 
   const { data, error } = await supabase!
@@ -98,34 +97,7 @@ export const fetchNews = async (): Promise<NewsItem[]> => {
 
 export const fetchHotTopic = async (): Promise<HotTopic | null> => {
   if (useMock) {
-    // 1. Get latest news sorted by date
-    const sortedNews = [...MOCK_NEWS].sort((a, b) => 
-      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-    );
-    
-    const latestNews = sortedNews[0];
-    
-    // 2. Check if the latest news is within 2 hours
-    if (latestNews) {
-      const newsTime = new Date(latestNews.publishedAt).getTime();
-      const currentTime = Date.now();
-      const hoursDiff = (currentTime - newsTime) / (1000 * 60 * 60);
-      
-      // Strict check: Only show as Hot Topic if <= 2 hours old
-      if (hoursDiff <= 2) {
-        return {
-          id: `breaking-${latestNews.id}`,
-          title: `ताजा अपडेट: ${latestNews.title}`, // Prefix: Fresh Update
-          description: latestNews.description,
-          isActive: true
-        };
-      }
-    }
-
-    // Fallback: If no news is recent enough (< 2 hours), return a random static topic
-    // This handles the case where "new" news isn't available
-    const randomIndex = Math.floor(Math.random() * MOCK_HOT_TOPICS.length);
-    return MOCK_HOT_TOPICS[randomIndex];
+    return Math.random() > 0.3 ? MOCK_HOT_TOPIC : null; // 70% chance of hot topic
   }
 
   const { data, error } = await supabase!
